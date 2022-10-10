@@ -2,7 +2,6 @@ package com.samoy.image_save;
 
 import static android.os.Environment.DIRECTORY_PICTURES;
 
-import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -17,7 +16,6 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,12 +33,11 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry;
 
 /**
  * ImageSavePlugin
  */
-public class ImageSavePlugin implements MethodCallHandler, FlutterPlugin, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
+public class ImageSavePlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
     private Context applicationContext;
     private static final int REQ_CODE = 100;
     private MethodCall call;
@@ -66,12 +63,7 @@ public class ImageSavePlugin implements MethodCallHandler, FlutterPlugin, Activi
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         this.call = call;
         this.result = result;
-        if (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            methodCall(call, result);
-        } else {
-            ActivityCompat.requestPermissions(activityPluginBinding.getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQ_CODE);
-            activityPluginBinding.addRequestPermissionsResultListener(this);
-        }
+        methodCall(call, result);
     }
 
     private void methodCall(MethodCall call, Result result) {
@@ -254,17 +246,6 @@ public class ImageSavePlugin implements MethodCallHandler, FlutterPlugin, Activi
     @Override
     public void onDetachedFromActivity() {
         this.activityPluginBinding = null;
-    }
-
-    @Override
-    public boolean onRequestPermissionsResult(int i, String[] strings, int[] grantResults) {
-        boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        if (granted) {
-            methodCall(call, result);
-        } else {
-            result.error("0", "Permission denied", null);
-        }
-        return granted;
     }
 
     private String getApplicationName() {
